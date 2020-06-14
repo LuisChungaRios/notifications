@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Message;
 use App\User;
 use Carbon\Carbon;
 use Exception;
@@ -11,6 +12,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class NotificationController extends Controller
 {
+
+
+
     public function index()
     {
         $unreadNotifications = auth()->user()->unreadNotifications;
@@ -30,33 +34,24 @@ class NotificationController extends Controller
         return back()->with('flash','Notificación eliminada');
     }
 
-    public function event(Request $request)
+
+    public function event()
     {
        try {
 
-        // $response = new StreamedResponse();
-        // $response->headers->set('Content-Type', 'text/event-stream');
-        // $response->headers->set('Cache-Control', 'no-cache');
-        // $response->setCallback(
-        //     function() {
-        //             echo 'data:'.json_encode(User::all()).'\n\n';
-        //             ob_flush();
-        //             flush();
-        //     });
-        // $response->send();
-
-         return response()->stream( function () {
-            while(true) {
-                echo 'data.'.json_encode(auth()->user()->unreadNotifications).'\n\n';
-                ob_flush();
-                flush();
-                sleep(10);
-            };
-        }, 200,[
-            'Content-Type' => 'text/event-stream',
-            'X-Accel-Buffering' => 'no',
-            'Cache-Control'=> 'no-cache',
-        ]);
+           $response = new StreamedResponse(function() {
+               while(true) {
+                   $notifications = DatabaseNotification::where('notifiable_id', auth()->user()->id)->where('read_at', null)->get()->toArray();
+                   echo 'data: ' . json_encode($notifications) . "\n\n";
+                   ob_flush();
+                   flush();
+                   sleep(10);
+               }
+           });
+           $response->headers->set('Content-Type', 'text/event-stream');
+           $response->headers->set('X-Accel-Buffering', 'no');
+           $response->headers->set('Cach-Control', 'no-cache');
+           return $response;
        } catch(Exception $e) {
            return $e;
        }

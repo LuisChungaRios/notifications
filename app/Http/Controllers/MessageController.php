@@ -30,12 +30,14 @@ class MessageController extends Controller
 
         $recipient = User::find($request->recipient_id);
         $recipient->notify( new MessageSent($message));
-
         return back()->with('flash', 'Tu mensaje fue enviado');
     }
 
     public function show(Message $message)
     {
+
+
+
         return view('messages.show', compact('message'));
     }
 }
