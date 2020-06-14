@@ -22,3 +22,29 @@
     </div>
 </div>
 @endsection
+@section('scripts')
+
+<script>
+
+    let event = new  EventSource( "{{ route('notifications.event') }}" );
+    console.log(event)
+
+    event.addEventListener('message' ,  e => {
+        console.log(e)
+        console.log(e.data)
+    })
+    // event.onmessage(e => {
+    //     console.log(e)
+    //     alert(e.data);
+    // });
+
+        event.document.addEventListener('error',  e => {
+            console.error(e)
+        })
+    // event.onerror(e => {
+    //     console.error(e)
+    // })
+
+</script>
+
+@endsection
